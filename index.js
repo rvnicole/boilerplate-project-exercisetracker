@@ -45,3 +45,4 @@ const EsquemaDatos = new mongoose.Schema({
   log: [EsquemaLog]
 });
 
+const ModeloDatos = mongoose.model( 'Datos', EsquemaDatos );
