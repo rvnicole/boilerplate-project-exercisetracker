@@ -45,4 +45,23 @@ const EsquemaDatos = new mongoose.Schema({
   log: [EsquemaLog]
 });
 
-const ModeloDatos = mongoose.model( 'Datos', EsquemaDatos );
+const ModeloDatos = mongoose.model('Datos', EsquemaDatos);
+
+app.post("/api/users", async (req, res) => {
+  const user = req.body;
+
+  if (!user.username) {
+    res.json({ error: "Invalid username" });
+    return;
+  };
+
+  const userRegistrado = await agregarUsuario(user);
+  const { username, _id } = userRegistrado;
+  res.json({ username, _id });
+});
+
+
+async function agregarUsuario(user) {
+  const documento = new ModeloDatos(user);
+  return await documento.save();
+}
