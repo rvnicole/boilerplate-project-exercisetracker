@@ -17,4 +17,7 @@ const listener = app.listen(process.env.PORT || 3000, () => {
 });
 
 const mySecret = process.env['URI_BD'];
-
+mongoose.connect( mySecret, {
+  useNewUrlParser: true, 
+  useUnifiedTopology: true
+});
