@@ -61,7 +61,57 @@ app.post("/api/users", async (req, res) => {
 });
 
 
+app.get("/api/users", async (req, res) => {
+  const usuarios = await obtenerTodosUsuarios();
+  res.send(usuarios);
+});
+
+
+app.post("/api/users/:_id/exercises", async (req, res) => {
+  const { _id } = req.params;
+  let { description, duration, date } = req.body;
+
+  if (!_id || !description || !duration) {
+    res.json({ error: "Required data" });
+    return;
+  };
+
+  if (/\d{4}-\d{2}-\d{2}/.test(date)) {
+    const fecha = new Date(date);
+    date = fecha.toDateString();
+  } else {
+    const fecha = new Date();
+    date = fecha.toDateString();
+  };
+
+  const ejercicio = await agregarEjercicio(_id, description, duration, date);
+  res.json(ejercicio);
+});
+
 async function agregarUsuario(user) {
   const documento = new ModeloDatos(user);
   return await documento.save();
+};
+
+async function obtenerTodosUsuarios() {
+  return await ModeloDatos.find()
+    .select({
+      username: 1,
+      _id: 1,
+      __v: 1
+    })
+    .exec();
+};
+
+async function agregarEjercicio(_id, description, duration, date) {
+  const usuario = await buscarUsuario(_id);
+  usuario.log.push({ description, duration, date });
+  usuario.count = usuario.log.length;
+
+  const user = await agregarUsuario(usuario);
+  return { username: user.username, description, duration, date, _id };
+};
+
+async function buscarUsuario(_id) {
+  return await ModeloDatos.findById(_id);
 }
