@@ -84,14 +84,28 @@ app.post("/api/users/:_id/exercises", async (req, res) => {
     date = fecha.toDateString();
   };
 
-  duration = Number( duration );
+  duration = Number(duration);
 
   const ejercicio = await agregarEjercicio(_id, description, duration, date);
   res.json(ejercicio);
 });
 
 app.get("/api/users/:_id/logs", async (req, res) => {
+  console.log(req.query);
+  const { from, to, limit } = req.query;
   const { _id } = req.params;
+
+  if (from && to) {
+    const resultados = await buscarLogRango(_id, from, to, limit);
+    res.json(resultados);
+    return;
+  };
+
+  if (limit) {
+    const resultado = await buscarLogLimite(_id, limit);
+    res.json(resultado);
+    return;
+  };
 
   const usuario = await buscarUsuario(_id);
   res.json(usuario);
@@ -123,4 +137,31 @@ async function agregarEjercicio(_id, description, duration, date) {
 
 async function buscarUsuario(_id) {
   return await ModeloDatos.findById(_id);
-}
+};
+
+async function buscarLogRango(_id, from, to, limit) {
+  const user = await buscarUsuario(_id);
+  const desde = new Date(from).getTime();
+  const hasta = new Date(to).getTime();
+
+  const logs = user.log.filter(ejercicio => {
+    const date = new Date(ejercicio.date).getTime();
+
+    if (date >= desde && date <= hasta) {
+      return true;
+    };
+  });
+
+  if (limit) {
+    logs.splice(limit, logs.length);
+  };
+
+  user.log = logs;
+  return user;
+};
+
+async function buscarLogLimite(_id, limit) {
+  const user = await buscarUsuario(_id);
+  user.log.splice(limit, user.log.length);
+  return user;
+};
