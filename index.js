@@ -90,8 +90,8 @@ app.post("/api/users/:_id/exercises", async (req, res) => {
   res.json(ejercicio);
 });
 
+
 app.get("/api/users/:_id/logs", async (req, res) => {
-  console.log(req.query);
   const { from, to, limit } = req.query;
   const { _id } = req.params;
 
@@ -111,10 +111,12 @@ app.get("/api/users/:_id/logs", async (req, res) => {
   res.json(usuario);
 });
 
+
 async function agregarUsuario(user) {
   const documento = new ModeloDatos(user);
   return await documento.save();
 };
+
 
 async function obtenerTodosUsuarios() {
   return await ModeloDatos.find()
@@ -126,6 +128,7 @@ async function obtenerTodosUsuarios() {
     .exec();
 };
 
+
 async function agregarEjercicio(_id, description, duration, date) {
   const usuario = await buscarUsuario(_id);
   usuario.log.push({ description, duration, date });
@@ -135,9 +138,13 @@ async function agregarEjercicio(_id, description, duration, date) {
   return { username: user.username, description, duration, date, _id };
 };
 
+
 async function buscarUsuario(_id) {
-  return await ModeloDatos.findById(_id);
+  return await ModeloDatos.findById(_id)
+    .select({ __v: 0, log: { _id: 0 } })
+    .exec();
 };
+
 
 async function buscarLogRango(_id, from, to, limit) {
   const user = await buscarUsuario(_id);
@@ -159,6 +166,7 @@ async function buscarLogRango(_id, from, to, limit) {
   user.log = logs;
   return user;
 };
+
 
 async function buscarLogLimite(_id, limit) {
   const user = await buscarUsuario(_id);
