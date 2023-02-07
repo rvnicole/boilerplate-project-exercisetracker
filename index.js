@@ -84,8 +84,17 @@ app.post("/api/users/:_id/exercises", async (req, res) => {
     date = fecha.toDateString();
   };
 
+  duration = Number( duration );
+
   const ejercicio = await agregarEjercicio(_id, description, duration, date);
   res.json(ejercicio);
+});
+
+app.get("/api/users/:_id/logs", async (req, res) => {
+  const { _id } = req.params;
+
+  const usuario = await buscarUsuario(_id);
+  res.json(usuario);
 });
 
 async function agregarUsuario(user) {
